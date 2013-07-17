@@ -218,20 +218,20 @@
       hook "onInit"
 
     # Go to next step, exposed as public
-    # Can be retrived by e.g. $(".acc-wizard").data('plugin_accwizard').go_next
+    # Can be retrived by $('#el').accwizard('go_next')
     go_next = (ev)->
-      ev.preventDefault()
+      ev.preventDefault() if ev?
       panel = $(this).parents(".accordion-body")[0]
-      return unless hook("beforeNext", panel)
+      return unless panel? and hook("beforeNext", panel)
       show_accordion_body $(panel).parents(".accordion-group").next(".accordion-group")[0]
       hook "onNext", panel
 
     # Go back to previous step, exposed as public
-    # Can be retrived by e.g. $(".acc-wizard").data('plugin_accwizard').go_prev
+    # Can be retrived by $('#el').accwizard('go_prev')
     go_prev = (ev)->
-      ev.preventDefault()
+      ev.preventDefault() if ev?
       panel = $(this).parents(".accordion-body")[0]
-      return unless hook("beforeBack", panel)
+      return unless panel? and hook("beforeBack", panel)
       show_accordion_body $(panel).parents(".accordion-group").prev(".accordion-group")[0]
       hook "onPrev", panel
 
@@ -241,8 +241,8 @@
     show_step = (step)-> show_accordion_body($el, step-1)
 
     # Get/set a plugin option.
-    # Get usage: $('#el').acc-wizard('option', 'key');
-    # Set usage: $('#el').acc-wizard('option', 'key', value);
+    # Get usage: $('#el').accwizard('option', 'key');
+    # Set usage: $('#el').accwizard('option', 'key', value);
     option = (key, val) ->
       if val
         options[key] = val
@@ -250,7 +250,7 @@
         options[key]
     
     # Destroy plugin.
-    # Usage: $('#el').acc-wizard('destroy');
+    # Usage: $('#el').accwizard('destroy')();
     destroy = ->
       hook "onDestroy"
     
@@ -296,9 +296,14 @@
         # Check that the element has a plugin instance, and that
         # the requested public method exists.
         if $.data(this, "plugin_" + pluginName) and typeof $.data(this, "plugin_" + pluginName)[methodName] is "function"
-          # Call the method of the Plugin instance, and pPass it
-          # the supplied arguments.
-          returnVal = $.data(this, "plugin_" + pluginName)[methodName].apply(this, args)
+          if args.length > 0
+	          # if arguments are supplied, call the method of the Plugin instance, and pass it
+	          # the supplied arguments.
+            returnVal = $.data(this, "plugin_" + pluginName)[methodName].apply(this, args)
+          else
+	          # if no argument is supplied, return the function, user can invoke it when required
+	          # good for event binding
+	          returnVal = $.data(this, "plugin_" + pluginName)[methodName]
         else
           throw new Error("Method " + methodName + " does not exist on jQuery." + pluginName)
 
@@ -336,7 +341,7 @@
     backClasses: "btn"                           # class(es) for back button
     beforeNext: -> true                          # hook before going to next step, e.g. used for validation
     onNext: -> true                              # function to call on next step
-    beforeBack: -> true                          # hook bofere going to previous step
+    beforeBack: -> true                          # hook before going to previous step
     onBack: -> true                              # function to call on back up
     onInit: -> true                              # a chance to hook initialization
     onDestroy: -> true                           # a chance to hook destruction
