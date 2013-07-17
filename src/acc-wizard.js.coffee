@@ -223,8 +223,7 @@
       ev.preventDefault()
       panel = $(this).parents(".accordion-body")[0]
       return unless hook("beforeNext", panel)
-      next = "#" + $(".accordion-body", $(panel).parents(".accordion-group").next(".accordion-group")[0])[0].id
-      $(next).collapse "show"
+      show_accordion_body $(panel).parents(".accordion-group").next(".accordion-group")[0]
       hook "onNext", panel
 
     # Go back to previous step, exposed as public
@@ -233,10 +232,14 @@
       ev.preventDefault()
       panel = $(this).parents(".accordion-body")[0]
       return unless hook("beforeBack", panel)
-      prev = "#" + $(".accordion-body", $(panel).parents(".accordion-group").prev(".accordion-group")[0])[0].id
-      $(prev).collapse "show"
+      show_accordion_body $(panel).parents(".accordion-group").prev(".accordion-group")[0]
       hook "onPrev", panel
-			
+
+    show_accordion_body = (parent, index = 0)-> $($(".accordion-body", parent)[index]).collapse "show"
+
+    # show accordion step, starting from 1
+    show_step = (step)-> show_accordion_body($el, step-1)
+
     # Get/set a plugin option.
     # Get usage: $('#el').acc-wizard('option', 'key');
     # Set usage: $('#el').acc-wizard('option', 'key', value);
@@ -277,6 +280,7 @@
     destroy: destroy
     go_next: go_next
     go_prev: go_prev
+    show_step: show_step
 
   pluginName = "accwizard"
   # Build the plugin here
